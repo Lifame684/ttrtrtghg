@@ -6,8 +6,10 @@ import random
 import sys
 import os
 
-# Add the current directory to sys.path for Render imports
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Add the parent directory (src) to sys.path to resolve 'game' and 'ai' modules
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(current_dir) # Add src to path
 
 from game.table import Table
 from game.tournament import Tournament
