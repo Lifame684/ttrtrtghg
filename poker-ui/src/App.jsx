@@ -8,7 +8,7 @@ import {
 import axios from 'axios';
 import { useSoundEffects } from './hooks/useSoundEffects';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+const API_BASE = 'https://poker-backend-m75k.onrender.com';
 
 const AVATARS = [
   { id: 0, icon: <User size={40} /> },
@@ -279,8 +279,8 @@ function App() {
         {gameState?.analysis && (
           <motion.div initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
             className={`flex items-center p-3 px-6 rounded-2xl border ${gameState.analysis.grade === 'Грубая ошибка' ? 'bg-red-500/10 border-red-500/50 text-red-400' :
-                gameState.analysis.grade === 'Ошибка' ? 'bg-orange-500/10 border-orange-500/50 text-orange-400' :
-                  'bg-green-500/10 border-green-500/50 text-green-400'
+              gameState.analysis.grade === 'Ошибка' ? 'bg-orange-500/10 border-orange-500/50 text-orange-400' :
+                'bg-green-500/10 border-green-500/50 text-green-400'
               }`}
           >
             <BrainCircuit className="mr-3" size={24} />
@@ -330,7 +330,7 @@ function App() {
                 className="absolute flex flex-col items-center z-10"
               >
                 <div className={`w-20 h-20 md:w-24 md:h-24 rounded-full border-4 transition-all duration-300 ${isCurrent ? 'border-yellow-400 shadow-[0_0_30px_rgba(250,204,21,0.6)] ring-4 ring-yellow-400/20' :
-                    player.is_active ? 'border-green-500/50' : 'border-slate-800 opacity-40'
+                  player.is_active ? 'border-green-500/50' : 'border-slate-800 opacity-40'
                   } bg-slate-900 flex items-center justify-center relative shadow-2xl`}>
                   {player.is_human && <div className="absolute -top-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-[8px] md:text-[10px] px-3 py-0.5 rounded-full font-black shadow-lg z-20">ВЫ</div>}
                   <div className={player.is_active ? 'text-white' : 'text-slate-700'}>
