@@ -3,6 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import random
+import sys
+import os
+
+# Add the current directory to sys.path for Render imports
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from game.table import Table
 from game.tournament import Tournament
