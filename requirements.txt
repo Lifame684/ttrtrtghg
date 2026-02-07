@@ -1,0 +1,6 @@
+treys
+fastapi
+uvicorn
+pydantic
+python-multipart
+

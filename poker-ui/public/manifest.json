@@ -1,0 +1,16 @@
+{
+    "name": "Poker Simulator Pro",
+    "short_name": "PokerSim",
+    "description": "Professional tournament poker training simulator",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#facc15",
+    "icons": [
+        {
+            "src": "vite.svg",
+            "type": "image/svg+xml",
+            "sizes": "192x192 512x512"
+        }
+    ]
+}

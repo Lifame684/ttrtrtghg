@@ -1,0 +1,39 @@
+{
+  "name": "poker-simulator",
+  "version": "1.0.0",
+  "main": "electron-main.js",
+  "scripts": {
+    "frontend-install": "cd poker-ui && npm install",
+    "frontend-build": "cd poker-ui && npm run build",
+    "backend-start": "python src/server.py",
+    "electron-dev": "set NODE_ENV=development && electron .",
+    "dev": "concurrently \"npm run backend-start\" \"cd poker-ui && npm run dev\" \"wait-on http://localhost:5173 && npm run electron-dev\"",
+    "build": "npm run frontend-build && electron-builder --win"
+  },
+  "build": {
+    "appId": "com.poker.simulator",
+    "productName": "Poker Simulator",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "electron-main.js",
+      "preload.js",
+      "poker-ui/dist/**/*",
+      "src/**/*"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "src/**/*"
+    ],
+    "win": {
+      "target": "portable"
+    }
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "concurrently": "^8.2.2",
+    "wait-on": "^7.2.0",
+    "electron-builder": "^24.13.3"
+  }
+}
