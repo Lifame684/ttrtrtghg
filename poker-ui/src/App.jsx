@@ -8,7 +8,7 @@ import {
 import axios from 'axios';
 import { useSoundEffects } from './hooks/useSoundEffects';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = '/api';
 
 const AVATARS = [
   { id: 0, icon: <User size={40} /> },

@@ -7,3 +7,7 @@ INFO:     127.0.0.1:33220 - "POST /start HTTP/1.1" 200 OK
 INFO:     127.0.0.1:33228 - "OPTIONS /action HTTP/1.1" 200 OK
 Analysis: {'grade': 'Хорошо', 'comment': 'Колл допустим.', 'recommended': 'fold'}
 INFO:     127.0.0.1:33236 - "POST /action HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [11208]
