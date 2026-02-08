@@ -7,7 +7,7 @@ import sys
 import os
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-# sys.path.append(current_dir)
+sys.path.append(current_dir)
 
 from game.table import Table
 from game.tournament import Tournament
