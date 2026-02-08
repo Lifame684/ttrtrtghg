@@ -8,7 +8,7 @@ import {
 import axios from 'axios';
 import { useSoundEffects } from './hooks/useSoundEffects';
 
-const API_BASE = 'https://poker-backend-m75k.onrender.com';
+const API_BASE = 'http://localhost:8000';
 
 const AVATARS = [
   { id: 0, icon: <User size={40} /> },
@@ -125,6 +125,24 @@ function App() {
           <StatCard label="Прибыль" value={stats?.profit || 0} color={stats?.profit >= 0 ? 'text-green-500' : 'text-red-500'} />
           <StatCard label="Ошибок всего" value={stats?.errors || 0} color="text-orange-500" />
         </div>
+
+        {stats?.error_log?.length > 0 && (
+          <div className="w-full max-w-2xl space-y-4">
+            <h3 className="text-xl font-bold text-slate-400 uppercase tracking-widest">Последние ошибки</h3>
+            <div className="space-y-2">
+              {stats.error_log.map((err, i) => (
+                <div key={i} className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-red-400 font-bold uppercase text-xs">{err.verdict}</span>
+                    <span className="text-slate-500 text-[10px]">{err.timestamp}</span>
+                  </div>
+                  <p className="text-sm text-slate-300">{err.comment}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <button onClick={() => setShowStats(false)} className="bg-slate-800 hover:bg-slate-700 p-4 px-8 rounded-2xl font-bold flex items-center transition-all active:scale-95">
           <Home className="mr-2" /> НАЗАД В МЕНЮ
         </button>
@@ -286,7 +304,15 @@ function App() {
             <BrainCircuit className="mr-3" size={24} />
             <div>
               <div className="text-[10px] font-black uppercase tracking-tighter leading-none mb-1">{gameState.analysis.grade}</div>
-              <div className="text-sm font-medium leading-none">{gameState.analysis.comment}</div>
+              <div className="text-sm font-medium leading-none mb-1">{gameState.analysis.comment}</div>
+              {gameState.analysis.recommended && (
+                <div className="text-[10px] font-bold uppercase text-slate-400 italic">
+                  Рекомендация: <span className="text-white">
+                    {gameState.analysis.recommended.toLowerCase().includes('fold') ? 'ПАС' :
+                     gameState.analysis.recommended.toLowerCase().includes('call') ? 'КОЛЛ/ЧЕК' : 'РЕЙЗ'}
+                  </span>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -333,6 +359,7 @@ function App() {
                   player.is_active ? 'border-green-500/50' : 'border-slate-800 opacity-40'
                   } bg-slate-900 flex items-center justify-center relative shadow-2xl`}>
                   {player.is_human && <div className="absolute -top-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-[8px] md:text-[10px] px-3 py-0.5 rounded-full font-black shadow-lg z-20">ВЫ</div>}
+                  <div className="absolute -right-2 top-0 bg-slate-800 border border-white/20 text-[8px] font-black px-1.5 py-0.5 rounded shadow-lg z-20">{player.position}</div>
                   <div className={player.is_active ? 'text-white' : 'text-slate-700'}>
                     {React.cloneElement(avatar.icon, { size: isCurrent ? 48 : 40 })}
                   </div>
