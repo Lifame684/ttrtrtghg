@@ -3,12 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Users, Coins, Info, BrainCircuit, BarChart3,
   PlayCircle, Home, User, Ghost, Smile,
-  Star, Heart, Bird, Cat, Dog, Rabbit
+  Star, Heart, Bird, Cat, Dog, Rabbit,
+  GraduationCap, Settings, LayoutDashboard, Flame, CheckCircle2, ChevronRight
 } from 'lucide-react';
 import axios from 'axios';
 import { useSoundEffects } from './hooks/useSoundEffects';
 
-const API_BASE = 'https://poker-backend-m75k.onrender.com';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 const AVATARS = [
   { id: 0, icon: <User size={40} /> },
@@ -28,16 +29,58 @@ const DIFFICULTIES = [
   { id: 'hard', name: 'Профи', desc: 'Минимум ошибок, агрессия' },
 ];
 
+const TRAINING_MODULES = [
+  {
+    id: 'bubble',
+    title: 'Игра на баббле',
+    description: 'Давление на оппонентов в призовой зоне.',
+    difficulty: 'СРЕДНЕ',
+    difficultyColor: 'text-yellow-500 bg-yellow-500/10',
+    progress: 40,
+    icon: <Users size={24} className="text-blue-400" />,
+    scenario: 'bubble'
+  },
+  {
+    id: 'classic',
+    title: 'Префлоп диапазоны',
+    description: 'Отработка чартов открытия и защиты.',
+    difficulty: 'ЛЕГКО',
+    difficultyColor: 'text-green-500 bg-green-500/10',
+    progress: 90,
+    icon: <BrainCircuit size={24} className="text-emerald-400" />,
+    scenario: 'classic'
+  },
+  {
+    id: 'short_stack',
+    title: 'Короткий стек',
+    description: 'Пуш-фолд решения при стеке < 15ББ.',
+    difficulty: 'СЛОЖНО',
+    difficultyColor: 'text-orange-500 bg-orange-500/10',
+    progress: 12,
+    icon: <Coins size={24} className="text-orange-400" />,
+    scenario: 'short_stack'
+  },
+  {
+    id: 'final_table',
+    title: 'Финальный стол',
+    description: 'Игра в раздутых банках после флопа.',
+    difficulty: 'ЭКСПЕРТ',
+    difficultyColor: 'text-red-500 bg-red-500/10',
+    progress: 0,
+    icon: <BarChart3 size={24} className="text-purple-400" />,
+    scenario: 'final_table'
+  }
+];
+
 function App() {
   const [gameState, setGameState] = useState(null);
   const [playerCount, setPlayerCount] = useState(6);
-  const [gameStarted, setGameStarted] = useState(false);
+  const [currentView, setCurrentView] = useState('home'); // home, training, stats, game
   const [raiseAmount, setRaiseAmount] = useState(100);
   const [loading, setLoading] = useState(false);
   const [scenario, setScenario] = useState('classic');
   const [difficulty, setDifficulty] = useState('medium');
   const [avatarId, setAvatarId] = useState(0);
-  const [showStats, setShowStats] = useState(false);
   const [stats, setStats] = useState(null);
 
   const { playSound } = useSoundEffects();
@@ -67,22 +110,21 @@ function App() {
   };
 
   useEffect(() => {
-    if (showStats) fetchStats();
-  }, [showStats]);
+    if (currentView === 'stats') fetchStats();
+  }, [currentView]);
 
-  const startGame = async () => {
+  const startGame = async (specificScenario = null) => {
     setLoading(true);
     try {
       const res = await axios.post(`${API_BASE}/start`, {
         player_count: playerCount,
         starting_stack: 1000,
-        scenario: scenario,
+        scenario: specificScenario || scenario,
         difficulty: difficulty,
         avatar_id: avatarId
       });
       setGameState(res.data);
-      setGameStarted(true);
-      setShowStats(false);
+      setCurrentView('game');
     } catch (err) {
       alert("Ошибка подключения к бэкенду. Пожалуйста, попробуйте позже или проверьте соединение.");
     } finally {
@@ -113,9 +155,91 @@ function App() {
     { id: 'final_table', name: 'Финальный стол', desc: 'Максимальное давление' },
   ];
 
-  if (showStats) {
+  const BottomNav = () => (
+    <div className="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-xl border-t border-slate-800 px-6 py-3 flex justify-between items-center z-50">
+      <NavItem id="home" icon={<Home size={24} />} label="Главная" />
+      <NavItem id="training" icon={<GraduationCap size={24} />} label="Тренировки" />
+      <NavItem id="stats" icon={<BarChart3 size={24} />} label="Анализ" />
+      <NavItem id="settings" icon={<Settings size={24} />} label="Настройки" />
+    </div>
+  );
+
+  const NavItem = ({ id, icon, label }) => {
+    const active = currentView === id;
     return (
-      <div className="flex flex-col items-center justify-center h-screen space-y-8 bg-slate-950 text-white p-4">
+      <button
+        onClick={() => setCurrentView(id)}
+        className={`flex flex-col items-center space-y-1 transition-all ${active ? 'text-blue-500' : 'text-slate-500 hover:text-slate-300'}`}
+      >
+        {icon}
+        <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
+        {active && <motion.div layoutId="nav-glow" className="w-1 h-1 bg-blue-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.8)]" />}
+      </button>
+    );
+  };
+
+  const TrainingView = () => (
+    <div className="flex flex-col h-screen bg-[#0f172a] text-white p-6 pb-24 overflow-y-auto">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h2 className="text-3xl font-black mb-1">Тренировки</h2>
+          <div className="text-slate-500 text-xs font-bold uppercase tracking-widest flex items-center">
+            УРОВЕНЬ 12 <span className="mx-2">•</span> ГРИНДЕР
+          </div>
+        </div>
+        <div className="bg-slate-800/50 p-2 px-4 rounded-full flex items-center space-x-2 border border-slate-700">
+          <Flame size={20} className="text-orange-500" />
+          <span className="font-black text-lg">12</span>
+        </div>
+      </div>
+
+      <div className="flex space-x-6 mb-8 border-b border-slate-800 overflow-x-auto no-scrollbar">
+        {['Все', 'Базовые', 'Продвинутые', 'ICM'].map((tab, i) => (
+          <button key={tab} className={`pb-4 px-2 text-sm font-bold transition-all relative whitespace-nowrap ${i === 0 ? 'text-blue-500' : 'text-slate-500 hover:text-slate-300'}`}>
+            {tab}
+            {i === 0 && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />}
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-4">
+        {TRAINING_MODULES.map((m) => (
+          <div key={m.id} onClick={() => startGame(m.scenario)} className="bg-slate-800/40 border border-slate-700/50 rounded-[24px] p-5 cursor-pointer hover:bg-slate-800/60 transition-all group active:scale-[0.98]">
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-3 bg-slate-900 rounded-2xl border border-slate-700 group-hover:border-blue-500/50 transition-colors">
+                {m.icon}
+              </div>
+              <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${m.difficultyColor}`}>
+                {m.difficulty}
+              </div>
+            </div>
+            <h3 className="text-xl font-bold mb-1">{m.title}</h3>
+            <p className="text-slate-400 text-sm mb-6">{m.description}</p>
+
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center text-xs font-bold text-slate-500 uppercase tracking-widest">
+                {m.progress === 100 ? <CheckCircle2 size={14} className="mr-1 text-green-500" /> : <BarChart3 size={14} className="mr-1" />}
+                Прогресс
+              </div>
+              <span className={`text-xs font-black ${m.progress === 100 ? 'text-green-500' : 'text-blue-500'}`}>{m.progress}%</span>
+            </div>
+            <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${m.progress}%` }}
+                className={`h-full ${m.progress === 100 ? 'bg-green-500' : 'bg-blue-500'}`}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+      <BottomNav />
+    </div>
+  );
+
+  if (currentView === 'stats') {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen space-y-8 bg-slate-950 text-white p-4 pb-24">
         <h2 className="text-4xl font-black text-yellow-500 uppercase tracking-tighter">ВАША СТАТИСТИКА</h2>
         <div className="grid grid-cols-2 gap-4 w-full max-w-2xl">
           <StatCard label="Раздач сыграно" value={stats?.total_hands || 0} />
@@ -125,16 +249,39 @@ function App() {
           <StatCard label="Прибыль" value={stats?.profit || 0} color={stats?.profit >= 0 ? 'text-green-500' : 'text-red-500'} />
           <StatCard label="Ошибок всего" value={stats?.errors || 0} color="text-orange-500" />
         </div>
-        <button onClick={() => setShowStats(false)} className="bg-slate-800 hover:bg-slate-700 p-4 px-8 rounded-2xl font-bold flex items-center transition-all active:scale-95">
+
+        {stats?.error_log?.length > 0 && (
+          <div className="w-full max-w-2xl space-y-4">
+            <h3 className="text-xl font-bold text-slate-400 uppercase tracking-widest">Последние ошибки</h3>
+            <div className="space-y-2">
+              {stats.error_log.map((err, i) => (
+                <div key={i} className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-red-400 font-bold uppercase text-xs">{err.verdict}</span>
+                    <span className="text-slate-500 text-[10px]">{err.timestamp}</span>
+                  </div>
+                  <p className="text-sm text-slate-300">{err.comment}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <button onClick={() => setCurrentView('home')} className="bg-slate-800 hover:bg-slate-700 p-4 px-8 rounded-2xl font-bold flex items-center transition-all active:scale-95">
           <Home className="mr-2" /> НАЗАД В МЕНЮ
         </button>
+        <BottomNav />
       </div>
     );
   }
 
-  if (!gameStarted) {
+  if (currentView === 'training') {
+    return <TrainingView />;
+  }
+
+  if (currentView === 'home') {
     return (
-      <div className="flex flex-col items-center justify-center h-screen space-y-8 bg-slate-950 text-white overflow-y-auto py-10 px-4">
+      <div className="flex flex-col items-center justify-center h-screen space-y-8 bg-slate-950 text-white overflow-y-auto py-10 px-4 pb-24">
         <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center">
           <h1 className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-600 mb-2 leading-none">
             ПОКЕРНЫЙ ТРЕНЕР
@@ -144,7 +291,7 @@ function App() {
 
         <div className="bg-slate-900 p-6 md:p-10 rounded-[32px] shadow-2xl border border-slate-800 w-full max-w-[800px] backdrop-blur-xl bg-opacity-80 space-y-8">
           <div className="flex justify-center border-b border-slate-800 pb-6">
-            <button onClick={() => setShowStats(true)} className="flex flex-col items-center text-slate-400 hover:text-white transition-colors group">
+            <button onClick={() => setCurrentView('stats')} className="flex flex-col items-center text-slate-400 hover:text-white transition-colors group">
               <div className="p-3 rounded-full bg-slate-800 group-hover:bg-slate-700 mb-2 transition-all"><BarChart3 size={24} /></div>
               <span className="text-[10px] uppercase font-black tracking-widest">Статистика</span>
             </button>
@@ -201,12 +348,25 @@ function App() {
           </div>
 
           <button
-            onClick={startGame} disabled={loading}
+            onClick={() => startGame()} disabled={loading}
             className="w-full bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-600 text-white font-black py-5 rounded-2xl text-xl shadow-xl shadow-green-900/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center uppercase tracking-widest"
           >
             {loading ? "ИНИЦИАЛИЗАЦИЯ..." : <><PlayCircle className="mr-2" /> НАЧАТЬ ТРЕНИРОВКУ</>}
           </button>
         </div>
+        <BottomNav />
+      </div>
+    );
+  }
+
+  if (currentView === 'settings') {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen space-y-8 bg-slate-950 text-white p-4 pb-24">
+        <h2 className="text-4xl font-black text-blue-500 uppercase tracking-tighter">НАСТРОЙКИ</h2>
+        <div className="w-full max-w-md bg-slate-900 p-8 rounded-[32px] border border-slate-800">
+           <p className="text-slate-400 text-center italic">Раздел находится в разработке...</p>
+        </div>
+        <BottomNav />
       </div>
     );
   }
@@ -255,7 +415,7 @@ function App() {
     <div className="h-screen w-full relative overflow-hidden bg-slate-950 flex flex-col text-white font-sans">
       <div className="p-4 px-8 flex justify-between items-center bg-slate-900/50 backdrop-blur-md border-b border-white/5 z-20">
         <div className="flex items-center space-x-8">
-          <button onClick={() => setGameStarted(false)} className="text-slate-500 hover:text-white transition-colors"><Home /></button>
+          <button onClick={() => setCurrentView('home')} className="text-slate-500 hover:text-white transition-colors"><Home /></button>
           <div className="flex flex-col">
             <span className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Банк</span>
             <div className="flex items-center text-2xl font-black text-yellow-500">
@@ -286,7 +446,15 @@ function App() {
             <BrainCircuit className="mr-3" size={24} />
             <div>
               <div className="text-[10px] font-black uppercase tracking-tighter leading-none mb-1">{gameState.analysis.grade}</div>
-              <div className="text-sm font-medium leading-none">{gameState.analysis.comment}</div>
+              <div className="text-sm font-medium leading-none mb-1">{gameState.analysis.comment}</div>
+              {gameState.analysis.recommended && (
+                <div className="text-[10px] font-bold uppercase text-slate-400 italic">
+                  Рекомендация: <span className="text-white">
+                    {gameState.analysis.recommended.toLowerCase().includes('fold') ? 'ПАС' :
+                     gameState.analysis.recommended.toLowerCase().includes('call') ? 'КОЛЛ/ЧЕК' : 'РЕЙЗ'}
+                  </span>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -333,6 +501,7 @@ function App() {
                   player.is_active ? 'border-green-500/50' : 'border-slate-800 opacity-40'
                   } bg-slate-900 flex items-center justify-center relative shadow-2xl`}>
                   {player.is_human && <div className="absolute -top-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-[8px] md:text-[10px] px-3 py-0.5 rounded-full font-black shadow-lg z-20">ВЫ</div>}
+                  <div className="absolute -right-2 top-0 bg-slate-800 border border-white/20 text-[8px] font-black px-1.5 py-0.5 rounded shadow-lg z-20">{player.position}</div>
                   <div className={player.is_active ? 'text-white' : 'text-slate-700'}>
                     {React.cloneElement(avatar.icon, { size: isCurrent ? 48 : 40 })}
                   </div>
@@ -386,7 +555,7 @@ function App() {
           </motion.div>
         )}
       </AnimatePresence>
-      {!isYourTurn && gameStarted && (
+      {!isYourTurn && currentView === 'game' && (
         <div className="h-44 md:h-48 bg-slate-950/80 flex items-center justify-center italic text-slate-600 animate-pulse tracking-widest uppercase text-xs">Оппоненты обдумывают ход...</div>
       )}
     </div>

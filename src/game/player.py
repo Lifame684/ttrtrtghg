@@ -8,7 +8,8 @@ class Player:
         self.avatar_id = avatar_id
         self.hand: List[Card] = []
         self.current_bet = 0
-        self.is_active = True  # В игре ли (не сбросил ли карты)
+        self.total_contribution = 0
+        self.is_active = True
         self.is_all_in = False
 
     def bet(self, amount: int):
@@ -18,11 +19,13 @@ class Player:
         
         self.stack -= amount
         self.current_bet += amount
+        self.total_contribution += amount
         return amount
 
     def reset_hand(self):
         self.hand = []
         self.current_bet = 0
+        self.total_contribution = 0
         self.is_active = True
         self.is_all_in = False
 
